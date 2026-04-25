@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <title>NES Hub | Retro Nintendo Entertainment System</title>
+    <title>NES hub</title>
     <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
     <style>
         * {
@@ -19,7 +19,6 @@
             padding: 2rem 1.5rem;
         }
 
-        /* Header */
         .header {
             text-align: center;
             margin-bottom: 2rem;
@@ -53,7 +52,6 @@
             color: #ffdd99;
         }
 
-        /* Toolbar */
         .toolbar {
             display: flex;
             flex-wrap: wrap;
@@ -106,7 +104,6 @@
             margin: 0 4px;
         }
 
-        /* Games Grid */
         .games-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -115,7 +112,6 @@
             margin: 0 auto;
         }
 
-        /* Game Card */
         .game-card {
             display: flex;
             align-items: center;
@@ -125,7 +121,6 @@
             border: 1px solid rgba(255, 204, 102, 0.25);
             border-radius: 24px;
             padding: 0.9rem 1.2rem;
-            text-decoration: none;
             transition: all 0.25s cubic-bezier(0.2, 0.9, 0.4, 1.1);
             cursor: pointer;
             position: relative;
@@ -188,7 +183,6 @@
             color: #ffcc66;
         }
 
-        /* No results */
         .no-results {
             text-align: center;
             grid-column: 1 / -1;
@@ -198,7 +192,6 @@
             color: #9eafcf;
         }
 
-        /* Footer */
         .footer {
             text-align: center;
             margin-top: 3rem;
@@ -208,7 +201,7 @@
             padding-top: 1.8rem;
         }
 
-        /* Fullscreen Emulator Modal */
+        /* Fullscreen Modal */
         .fullscreen-modal {
             display: none;
             position: fixed;
@@ -269,37 +262,6 @@
             max-width: 100%;
             max-height: calc(100vh - 60px);
             object-fit: contain;
-            box-shadow: 0 0 0 2px rgba(255, 204, 102, 0.3);
-        }
-        .loading-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            gap: 15px;
-            z-index: 20;
-        }
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 3px solid rgba(255, 204, 102, 0.2);
-            border-top: 3px solid #ffcc66;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        .loading-text {
-            color: #ffdd99;
-            font-family: monospace;
-            font-size: 0.8rem;
         }
 
         @media (max-width: 640px) {
@@ -317,7 +279,7 @@
     <h1>🎮 NES HUB</h1>
     <p>Nintendo Entertainment System — classic NES game collection</p>
     <div class="badge-row">
-        <div class="badge">🎮 50+ NES Games</div>
+        <div class="badge">🎮 NES Games</div>
         <div class="badge">⚡ Fullscreen Play</div>
         <div class="badge">💾 Save States</div>
         <div class="badge">🎮 Gamepad Ready</div>
@@ -327,7 +289,7 @@
 <div class="toolbar">
     <div class="search-box">
         <span>🔍</span>
-        <input type="text" id="searchInput" placeholder="search NES games... (Mario, Zelda, Metroid)">
+        <input type="text" id="searchInput" placeholder="search NES games...">
     </div>
     <div class="stats-badge">
         📚 <span id="totalCount">0</span> NES games
@@ -337,7 +299,7 @@
 <div id="gamesContainer" class="games-grid"></div>
 
 <div class="footer">
-    <span>🎮 NES Hub • Click any game to play in fullscreen • Powered by EmulatorJS</span>
+    <span>🎮 NES Hub • Click any game to play in fullscreen</span>
 </div>
 
 <!-- Fullscreen Emulator Modal -->
@@ -352,93 +314,196 @@
 </div>
 
 <script>
-    // ============================================================
-    // NES GAME DATABASE - ONLY NES GAMES, NO DUPLICATES WITH GBA
-    // ============================================================
-    // These are classic NES titles that don't overlap with GBA library
-    const nesGames = [
-        { name: "Super Mario Bros", icon: "🍄", link: "super_mario_bros" },
-        { name: "Super Mario Bros 2", icon: "🍄", link: "super_mario_bros_2" },
-        { name: "Super Mario Bros 3", icon: "⭐", link: "super_mario_bros_3" },
-        { name: "The Legend of Zelda", icon: "🗡️", link: "zelda" },
-        { name: "Zelda II - The Adventure of Link", icon: "⚔️", link: "zelda_2" },
-        { name: "Metroid", icon: "🕷️", link: "metroid" },
-        { name: "Castlevania", icon: "🦇", link: "castlevania" },
-        { name: "Castlevania II - Simon's Quest", icon: "🌙", link: "castlevania_2" },
-        { name: "Castlevania III - Dracula's Curse", icon: "🩸", link: "castlevania_3" },
-        { name: "Mega Man", icon: "🤖", link: "mega_man" },
-        { name: "Mega Man 2", icon: "⚡", link: "mega_man_2" },
-        { name: "Mega Man 3", icon: "🔧", link: "mega_man_3" },
-        { name: "Mega Man 4", icon: "💥", link: "mega_man_4" },
-        { name: "Mega Man 5", icon: "🎯", link: "mega_man_5" },
-        { name: "Mega Man 6", icon: "🌟", link: "mega_man_6" },
-        { name: "Contra", icon: "💣", link: "contra" },
-        { name: "Super Contra", icon: "🔫", link: "super_contra" },
-        { name: "Kirby's Adventure", icon: "⭐", link: "kirby_adventure" },
-        { name: "Final Fantasy", icon: "⚔️", link: "final_fantasy" },
-        { name: "Dragon Warrior", icon: "🐉", link: "dragon_warrior" },
-        { name: "Dragon Warrior II", icon: "🏰", link: "dragon_warrior_2" },
-        { name: "Dragon Warrior III", icon: "👑", link: "dragon_warrior_3" },
-        { name: "Dragon Warrior IV", icon: "✨", link: "dragon_warrior_4" },
-        { name: "Punch-Out!!", icon: "🥊", link: "punch_out" },
-        { name: "Mike Tyson's Punch-Out!!", icon: "👊", link: "mike_tyson_punch_out" },
-        { name: "Ninja Gaiden", icon: "🥷", link: "ninja_gaiden" },
-        { name: "Ninja Gaiden II", icon: "🗡️", link: "ninja_gaiden_2" },
-        { name: "Ninja Gaiden III", icon: "⚡", link: "ninja_gaiden_3" },
-        { name: "Double Dragon", icon: "🐉", link: "double_dragon" },
-        { name: "Double Dragon II", icon: "👊", link: "double_dragon_2" },
-        { name: "Double Dragon III", icon: "🥋", link: "double_dragon_3" },
-        { name: "Battletoads", icon: "🐸", link: "battletoads" },
-        { name: "Teenage Mutant Ninja Turtles", icon: "🐢", link: "tmnt" },
-        { name: "TMNT II - The Arcade Game", icon: "🍕", link: "tmnt_2" },
-        { name: "TMNT III - The Manhattan Project", icon: "🌆", link: "tmnt_3" },
-        { name: "DuckTales", icon: "🦆", link: "ducktales" },
-        { name: "DuckTales 2", icon: "💰", link: "ducktales_2" },
-        { name: "Chip 'n Dale Rescue Rangers", icon: "🐿️", link: "rescue_rangers" },
-        { name: "Chip 'n Dale Rescue Rangers 2", icon: "⚡", link: "rescue_rangers_2" },
-        { name: "Darkwing Duck", icon: "🦆", link: "darkwing_duck" },
-        { name: "TaleSpin", icon: "✈️", link: "talespin" },
-        { name: "Ghosts 'n Goblins", icon: "👻", link: "ghosts_n_goblins" },
-        { name: "Bionic Commando", icon: "🦾", link: "bionic_commando" },
-        { name: "Strider", icon: "⚔️", link: "strider" },
-        { name: "Rygar", icon: "🛡️", link: "rygar" },
-        { name: "Kid Icarus", icon: "🏹", link: "kid_icarus" },
-        { name: "Ice Climber", icon: "🧗", link: "ice_climber" },
-        { name: "Balloon Fight", icon: "🎈", link: "balloon_fight" },
-        { name: "Excitebike", icon: "🏍️", link: "excitebike" },
-        { name: "RC Pro-Am", icon: "🏎️", link: "rc_pro_am" },
-        { name: "Blaster Master", icon: "💥", link: "blaster_master" },
-        { name: "Crystalis", icon: "🔮", link: "crystalis" },
-        { name: "Faxanadu", icon: "📜", link: "faxanadu" },
-        { name: "StarTropics", icon: "🏝️", link: "startropics" },
-        { name: "Zoda's Revenge - StarTropics II", icon: "🌌", link: "startropics_2" },
-        { name: "River City Ransom", icon: "🏙️", link: "river_city_ransom" },
-        { name: "Paperboy", icon: "📰", link: "paperboy" },
-        { name: "Rampage", icon: "🦍", link: "rampage" },
-        { name: "Rush'n Attack", icon: "⚔️", link: "rushn_attack" },
-        { name: "Spy Hunter", icon: "🚗", link: "spy_hunter" },
-        { name: "1942", icon: "✈️", link: "1942" },
-        { name: "1943", icon: "🛩️", link: "1943" },
-        { name: "Galaga", icon: "👾", link: "galaga" },
-        { name: "Dig Dug", icon: "🕳️", link: "dig_dug" },
-        { name: "Pac-Man", icon: "👻", link: "pac_man" },
-        { name: "Ms. Pac-Man", icon: "🎀", link: "ms_pac_man" },
-        { name: "Tetris", icon: "🧩", link: "tetris" },
-        { name: "Dr. Mario", icon: "💊", link: "dr_mario" },
-        { name: "Bubble Bobble", icon: "🐉", link: "bubble_bobble" },
-        { name: "Rainbow Islands", icon: "🌈", link: "rainbow_islands" }
-    ];
-
-    // Game icons and hash mapping
-    function getGameHash(gameName) {
-        return gameName.toLowerCase().replace(/[^a-z0-9]/g, '_');
+    // ============ GOOGLE DRIVE CONFIG (WORKING FROM ORIGINAL CODE) ============
+    const FOLDER_ID = '1o48CfnNCC-nkgh4RF8W7mvinOfpELrbo';
+    const API_KEY = 'AIzaSyAL1l3O7Jr8M635xZsxT3jI9yE-yp13KTc';
+    
+    let romLibrary = [];
+    let filteredRoms = [];
+    let emu = null;
+    let currentRomName = '';
+    let currentRomBlob = null;
+    
+    const CORS_PROXIES = ['https://api.allorigins.win/raw?url=', 'https://corsproxy.io/?'];
+    
+    // Fetch ROMs from Google Drive
+    async function fetchDriveFolder() {
+        const files = [];
+        let pageToken = '';
+        do {
+            let url = `https://www.googleapis.com/drive/v3/files?q='${FOLDER_ID}'+in+parents&key=${API_KEY}&pageSize=1000&fields=nextPageToken,files(id,name,size)`;
+            if (pageToken) url += `&pageToken=${pageToken}`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.error?.message || 'API request failed');
+            }
+            const data = await response.json();
+            const validFiles = (data.files || []).filter(f => f.name.toLowerCase().endsWith(".nes"));
+            files.push(...validFiles.map(f => ({
+                id: f.id,
+                name: f.name.replace(/(\.nes)$/i, ''),
+                size: formatSize(parseInt(f.size) || 0)
+            })));
+            pageToken = data.nextPageToken;
+        } while (pageToken);
+        files.sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+        return files;
     }
-
-    function getGameIcon(gameName) {
-        const game = nesGames.find(g => g.name === gameName);
-        return game ? game.icon : "🎮";
+    
+    function formatSize(bytes) {
+        if (!bytes) return 'NES';
+        return (bytes / 1024).toFixed(0) + ' KB';
     }
-
+    
+    // Load ROM from Google Drive by file ID
+    async function loadRom(fileId, name) {
+        currentRomName = name;
+        const statusText = document.getElementById('status-text');
+        if (statusText) statusText.textContent = `Loading ${name}...`;
+        
+        try {
+            let blob = null;
+            // Try direct download first
+            try {
+                const response = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${API_KEY}`);
+                if (response.ok) blob = await response.blob();
+            } catch (e) { console.log('Direct failed:', e); }
+            
+            // Try proxies if direct fails
+            if (!blob || blob.size < 1000) {
+                const proxyUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;
+                for (const proxy of CORS_PROXIES) {
+                    try {
+                        const response = await fetch(proxy + encodeURIComponent(proxyUrl));
+                        if (response.ok) {
+                            const data = await response.blob();
+                            if (data.size > 1000 && !data.type.includes('text/html')) {
+                                blob = data;
+                                break;
+                            }
+                            const text = await data.text();
+                            if (text.includes('confirm=')) {
+                                const match = text.match(/confirm=([^&"']+)/);
+                                if (match) {
+                                    const confirmUrl = `https://drive.google.com/uc?export=download&confirm=${match[1]}&id=${fileId}`;
+                                    const confirmResp = await fetch(proxy + encodeURIComponent(confirmUrl));
+                                    if (confirmResp.ok) {
+                                        blob = await confirmResp.blob();
+                                        if (blob.size > 1000) break;
+                                    }
+                                }
+                            }
+                        }
+                    } catch (e) { console.log('Proxy failed:', e); }
+                }
+            }
+            
+            if (!blob || blob.size < 1000) throw new Error('Download failed');
+            
+            currentRomBlob = blob;
+            launchFullscreenEmulator(URL.createObjectURL(blob), name);
+            
+        } catch (error) {
+            console.error('Load error:', error);
+            alert('Failed to load ROM: ' + error.message);
+        }
+    }
+    
+    // Launch emulator in fullscreen
+    function launchFullscreenEmulator(romUrl, gameName) {
+        const fullscreenModal = document.getElementById('fullscreenModal');
+        const fullscreenEmulatorDiv = document.getElementById('fullscreenEmulator');
+        const fullscreenGameTitle = document.getElementById('fullscreenGameTitle');
+        
+        fullscreenGameTitle.textContent = `${gameName} (NES)`;
+        fullscreenModal.classList.add('active');
+        fullscreenEmulatorDiv.innerHTML = '';
+        
+        window.EJS_player = '#fullscreenEmulator';
+        window.EJS_core = 'nes';
+        window.EJS_gameName = gameName;
+        window.EJS_color = '#c41e3a';
+        window.EJS_startOnLoaded = true;
+        window.EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+        window.EJS_gameUrl = romUrl;
+        window.EJS_buttons = { playPause: false, restart: true, mute: false, settings: true, fullscreen: true, saveState: true, loadState: true };
+        
+        const oldScript = document.querySelector('script[src*="emulatorjs"][src*="loader"]');
+        if (oldScript) oldScript.remove();
+        
+        const script = document.createElement('script');
+        script.src = 'https://cdn.emulatorjs.org/stable/data/loader.js';
+        document.body.appendChild(script);
+    }
+    
+    function closeFullscreenEmulator() {
+        const fullscreenModal = document.getElementById('fullscreenModal');
+        const fullscreenEmulatorDiv = document.getElementById('fullscreenEmulator');
+        fullscreenModal.classList.remove('active');
+        fullscreenEmulatorDiv.innerHTML = '';
+        if (window.EJS_emulator) {
+            try { window.EJS_emulator.destroy?.(); } catch(e) {}
+            window.EJS_emulator = null;
+        }
+    }
+    
+    // Render game grid
+    function renderGames() {
+        const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+        let filtered = romLibrary.filter(rom => 
+            rom.name.toLowerCase().includes(searchTerm)
+        );
+        
+        document.getElementById('totalCount').innerText = filtered.length;
+        const container = document.getElementById('gamesContainer');
+        
+        if (filtered.length === 0) {
+            container.innerHTML = `<div class="no-results">✨ no NES games found — try a different search ✨</div>`;
+            return;
+        }
+        
+        function getIcon(name) {
+            if (name.includes('Mario')) return '🍄';
+            if (name.includes('Zelda')) return '🗡️';
+            if (name.includes('Metroid')) return '🕷️';
+            if (name.includes('Castlevania')) return '🦇';
+            if (name.includes('Mega Man') || name.includes('Megaman')) return '🤖';
+            if (name.includes('Contra')) return '💣';
+            if (name.includes('Kirby')) return '⭐';
+            if (name.includes('Final Fantasy')) return '⚔️';
+            if (name.includes('Dragon')) return '🐉';
+            if (name.includes('Punch-Out')) return '🥊';
+            if (name.includes('Ninja')) return '🥷';
+            if (name.includes('Double Dragon')) return '🐉';
+            if (name.includes('Battletoads')) return '🐸';
+            if (name.includes('Turtle') || name.includes('TMNT')) return '🐢';
+            if (name.includes('Duck')) return '🦆';
+            return '🎮';
+        }
+        
+        container.innerHTML = filtered.map(rom => `
+            <div class="game-card" data-id="${rom.id}" data-name="${escapeHtml(rom.name)}">
+                <div class="game-icon">${getIcon(rom.name)}</div>
+                <div class="game-info">
+                    <div class="game-title">
+                        ${escapeHtml(rom.name)}
+                        <span class="game-badge">NES</span>
+                    </div>
+                    <div class="arrow-hint">▶ play fullscreen</div>
+                </div>
+            </div>
+        `).join('');
+        
+        document.querySelectorAll('.game-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const fileId = card.getAttribute('data-id');
+                const gameName = card.getAttribute('data-name');
+                loadRom(fileId, gameName);
+            });
+        });
+    }
+    
     function escapeHtml(str) {
         return str.replace(/[&<>]/g, function(m) {
             if (m === '&') return '&amp;';
@@ -447,156 +512,49 @@
             return m;
         });
     }
-
-    // Render games grid
-    const container = document.getElementById("gamesContainer");
-    const searchInput = document.getElementById("searchInput");
-    const totalSpan = document.getElementById("totalCount");
-
-    function renderGames() {
-        const searchTerm = searchInput.value.trim().toLowerCase();
-        let filtered = nesGames.filter(game => 
-            game.name.toLowerCase().includes(searchTerm)
-        );
+    
+    // Load library on page load
+    async function init() {
+        const container = document.getElementById('gamesContainer');
+        container.innerHTML = '<div class="no-results"><div style="text-align:center"><div style="width:40px;height:40px;border:3px solid rgba(255,204,102,0.2);border-top-color:#ffcc66;border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 15px"></div><p>Loading NES library...</p></div></div>';
         
-        totalSpan.innerText = filtered.length;
-        
-        if (filtered.length === 0) {
-            container.innerHTML = `<div class="no-results">✨ no NES games found — try a different search ✨</div>`;
-            return;
+        try {
+            romLibrary = await fetchDriveFolder();
+            filteredRoms = romLibrary;
+            document.getElementById('totalCount').innerText = romLibrary.length;
+            renderGames();
+        } catch (error) {
+            console.error(error);
+            container.innerHTML = `<div class="no-results"><p>Error loading ROMs: ${error.message}</p><p style="margin-top:10px;font-size:12px">Make sure the Google Drive folder is accessible</p></div>`;
         }
-        
-        container.innerHTML = filtered.map(game => `
-            <div class="game-card" data-game="${escapeHtml(game.name)}" data-link="${game.link}">
-                <div class="game-icon">${game.icon}</div>
-                <div class="game-info">
-                    <div class="game-title">
-                        ${escapeHtml(game.name)}
-                        <span class="game-badge">NES</span>
-                    </div>
-                    <div class="arrow-hint">▶ play fullscreen</div>
-                </div>
-            </div>
-        `).join('');
-        
-        // Attach click handlers
-        document.querySelectorAll('.game-card').forEach(card => {
-            card.addEventListener('click', () => {
-                const gameName = card.getAttribute('data-game');
-                launchFullscreenEmulator(gameName);
-            });
-        });
     }
     
     // Search handler
     let debounceTimer;
-    searchInput.addEventListener("input", () => {
+    document.getElementById('searchInput').addEventListener('input', () => {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            renderGames();
-        }, 250);
+        debounceTimer = setTimeout(() => renderGames(), 250);
     });
     
-    // ============================================================
-    // FULLSCREEN EMULATOR (EmulatorJS)
-    // ============================================================
-    const fullscreenModal = document.getElementById("fullscreenModal");
-    const fullscreenEmulatorDiv = document.getElementById("fullscreenEmulator");
-    const fullscreenGameTitle = document.getElementById("fullscreenGameTitle");
-    const fullscreenCloseBtn = document.getElementById("fullscreenCloseBtn");
-    
-    let currentEmulator = null;
-    let currentGameName = "";
-    
-    function launchFullscreenEmulator(gameName) {
-        currentGameName = gameName;
-        fullscreenGameTitle.textContent = `${gameName} (NES)`;
-        fullscreenModal.classList.add("active");
-        
-        // Clear previous emulator
-        fullscreenEmulatorDiv.innerHTML = "";
-        
-        // Show loading indicator
-        const loadingDiv = document.createElement("div");
-        loadingDiv.className = "loading-overlay";
-        loadingDiv.innerHTML = `
-            <div class="loading-spinner"></div>
-            <div class="loading-text">Loading ${gameName}...</div>
-        `;
-        fullscreenEmulatorDiv.appendChild(loadingDiv);
-        
-        // Initialize EmulatorJS
-        window.EJS_player = "#fullscreenEmulator";
-        window.EJS_core = "nes";
-        window.EJS_gameName = gameName;
-        window.EJS_color = "#c41e3a";
-        window.EJS_startOnLoaded = true;
-        window.EJS_pathtodata = "https://cdn.emulatorjs.org/stable/data/";
-        
-        // For NES games, we need a ROM URL. Using demo ROMs or fetch from archive
-        // Since we can't host ROMs directly, we'll use a demo ROM or you can replace with your own URLs
-        // This uses a public domain NES ROM (Donkey Kong) as fallback, but you should host your own
-        
-        // For actual deployment, you would point to your own ROM files
-        // Using a public test ROM - replace with your actual ROM URLs
-        const romUrls = {
-            "Super Mario Bros": "https://archive.org/download/SuperMarioBros.Nes/Super%20Mario%20Bros.nes",
-            "The Legend of Zelda": "https://archive.org/download/LegendOfZelda.Nes/Legend%20Of%20Zelda.nes",
-            "Metroid": "https://archive.org/download/NesMetroid/Metroid.nes"
-        };
-        
-        let romUrl = romUrls[gameName];
-        if (!romUrl) {
-            // Default demo ROM URL - you should replace this with your own hosted ROMs
-            romUrl = "https://archive.org/download/SuperMarioBros.Nes/Super%20Mario%20Bros.nes";
-        }
-        
-        window.EJS_gameUrl = romUrl;
-        window.EJS_buttons = { playPause: false, restart: true, mute: false, settings: true, fullscreen: true, saveState: true, loadState: true };
-        
-        // Remove old script if exists
-        const oldScript = document.querySelector('script[src*="emulatorjs"][src*="loader"]');
-        if (oldScript) oldScript.remove();
-        
-        // Load emulator script
-        const script = document.createElement("script");
-        script.src = "https://cdn.emulatorjs.org/stable/data/loader.js";
-        script.onload = () => {
-            setTimeout(() => {
-                // Remove loading overlay once emulator is ready
-                const overlay = fullscreenEmulatorDiv.querySelector(".loading-overlay");
-                if (overlay) overlay.remove();
-            }, 1500);
-        };
-        document.body.appendChild(script);
-    }
-    
-    function closeFullscreenEmulator() {
-        fullscreenModal.classList.remove("active");
-        fullscreenEmulatorDiv.innerHTML = "";
-        // Clean up emulator instance
-        if (window.EJS_emulator) {
-            try {
-                window.EJS_emulator.destroy?.();
-            } catch(e) {}
-            window.EJS_emulator = null;
-        }
-    }
-    
-    fullscreenCloseBtn.addEventListener("click", closeFullscreenEmulator);
-    fullscreenModal.addEventListener("click", (e) => {
-        if (e.target === fullscreenModal) closeFullscreenEmulator();
+    // Fullscreen modal controls
+    document.getElementById('fullscreenCloseBtn').addEventListener('click', closeFullscreenEmulator);
+    document.getElementById('fullscreenModal').addEventListener('click', (e) => {
+        if (e.target === document.getElementById('fullscreenModal')) closeFullscreenEmulator();
     });
     
-    // Prevent body scroll when modal is open
     document.addEventListener('keydown', (e) => {
-        if (fullscreenModal.classList.contains('active') && e.key === 'Escape') {
+        if (document.getElementById('fullscreenModal').classList.contains('active') && e.key === 'Escape') {
             closeFullscreenEmulator();
         }
     });
     
-    // Initial render
-    renderGames();
+    // Add spin animation
+    const style = document.createElement('style');
+    style.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
+    document.head.appendChild(style);
+    
+    // Start
+    init();
 </script>
 </body>
 </html>
